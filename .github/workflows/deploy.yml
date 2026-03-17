@@ -1,44 +1,62 @@
 name: Deploy to Azure Web App
 
 on:
+  workflow_dispatch:
+    inputs:
+      landing_page_only:
+        description: 'Deploy landing page only'
+        required: false
+        default: 'false'
+
   push:
     branches:
       - main
       - develop
       - 'release/*'
 
-  workflow_dispatch:
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
-    # 🔥 Environment mapping
     environment: ${{ github.ref == 'refs/heads/main' && 'PRD' || github.ref == 'refs/heads/develop' && 'DEV' || 'UAT' }}
 
     steps:
-      # 1. Checkout
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # 2. Setup Node
-      - name: Setup Node.js
+      # 🔥 LANDING MODE
+      - name: Prepare landing page
+        if: ${{ github.event.inputs.landing_page_only == 'true' }}
+        run: |
+          mkdir deploy-package
+          cp landing.html deploy-package/index.html
+
+      - name: Deploy landing page
+        if: ${{ github.event.inputs.landing_page_only == 'true' }}
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: devops-practice-ilyas
+          publish-profile: ${{ secrets.PUBLISH_PROFILE }}
+          package: deploy-package
+
+      # 🔥 NORMAL FLOW
+      - name: Setup Node
+        if: ${{ github.event.inputs.landing_page_only != 'true' }}
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
 
-      # 3. Install
-      - name: Install dependencies
+      - name: Install
+        if: ${{ github.event.inputs.landing_page_only != 'true' }}
         run: npm install
 
-      # 4. Build
       - name: Build
+        if: ${{ github.event.inputs.landing_page_only != 'true' }}
         run: npm run build
 
-      # 5. Deploy
-      - name: Deploy to Azure Web App
+      - name: Deploy App
+        if: ${{ github.event.inputs.landing_page_only != 'true' }}
         uses: azure/webapps-deploy@v3
         with:
-          app-name: rg-devops-practice   # ⚠️ apna exact naam daalo
+          app-name: devops-practice-ilyas
           publish-profile: ${{ secrets.PUBLISH_PROFILE }}
           package: .
