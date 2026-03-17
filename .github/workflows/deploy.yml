@@ -1,0 +1,39 @@
+name: Deploy to Azure Web App
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # 4. Build project
+      - name: Build
+        run: npm run build
+
+      # 5. Deploy to Azure
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: rg-devops-practice   # ⚠️ replace with your app name
+          publish-profile: ${{ secrets.PUBLISH_PROFILE }}
+          package: .
