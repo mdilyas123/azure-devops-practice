@@ -34,7 +34,7 @@ jobs:
         if: ${{ github.event.inputs.landing_page_only == 'true' }}
         uses: azure/webapps-deploy@v3
         with:
-          app-name: devops-practice-ilyas
+          app-name: rg-devops-practice
           publish-profile: ${{ secrets.PUBLISH_PROFILE }}
           package: deploy-package
 
