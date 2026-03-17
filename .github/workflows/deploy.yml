@@ -39,6 +39,6 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: devops-practice-ilyas   # ⚠️ apna exact naam daalo
+          app-name: rg-devops-practice   # ⚠️ apna exact naam daalo
           publish-profile: ${{ secrets.PUBLISH_PROFILE }}
           package: .
